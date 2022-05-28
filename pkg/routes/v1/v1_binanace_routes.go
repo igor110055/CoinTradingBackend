@@ -10,5 +10,5 @@ func V1BinanceRoute(v1_binanace_route fiber.Router) {
 	binanace_route := v1_binanace_route.Group("/binance")
 
 	// Get BTC Coin mark_price
-	binanace_route.Get("future/btc/chart", v1_contorllers.FuturesBTCChart)
+	binanace_route.Post("future/chart", v1_contorllers.GetFuturesChart)
 }
