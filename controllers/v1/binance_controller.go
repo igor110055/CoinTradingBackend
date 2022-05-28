@@ -1,24 +1,28 @@
 package v1_contorllers
 
 import (
+	binance_futures "binanace_coin_trade_system/pkg/lib/binance-futures"
+	"binanace_coin_trade_system/types"
 	"context"
-	"github.com/adshao/go-binance/v2/futures"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
-	"log"
 )
 
-func FuturesBTCMarkPrice(c *fiber.Ctx) error {
+func FuturesBTCChart(c *fiber.Ctx) error {
 
-	err := godotenv.Load(".env")
+	futuresCleint := binance_futures.CreateBinanceFuturesClient()
 
+	futuresklines := binance_futures.CreateKlineServiceBySymbol(types.BTCUSDT, types.M15, futuresCleint)
+
+	response, err := futuresklines.Do(context.Background())
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error()})
 	}
 
-	env_data, err := godotenv.Read(".env")
-	futures_client := futures.NewClient(env_data["BINANCE_API_KEY"], env_data["BINANCE_SECRET_KEY"])
-
-	futures_client.NewSetServerTimeService().Do(context.Background())
-
+	return c.JSON(fiber.Map{
+		"error":      false,
+		"msg":        "success get BTC chart Data",
+		"chart_data": fiber.Map{"response": response},
+	})
 }
