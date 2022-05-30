@@ -35,3 +35,32 @@ func GetFuturesChart(c *fiber.Ctx) error {
 		"response": fiber.Map{"chart_data": response},
 	})
 }
+
+func SetFuturesLeverage(c *fiber.Ctx) error {
+
+	setFuturesLeverageModel := &models.SetFuturesLeverageModel{}
+
+	if err := c.BodyParser(setFuturesLeverageModel); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	futuresCleint := binance_futures.CreateBinanceFuturesClient()
+	futuresLeverage := binance_futures.UpdatePositonLeverageBySymbol(setFuturesLeverageModel.Symbol, setFuturesLeverageModel.Leverage, futuresCleint)
+
+	response, err := futuresLeverage.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error()})
+	}
+
+	return c.JSON(fiber.Map{
+		"error":    false,
+		"msg":      "success set leverage",
+		"response": fiber.Map{"chart_data": response},
+	})
+
+}
