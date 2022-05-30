@@ -12,4 +12,5 @@ func V1BinanceRoute(v1_binanace_route fiber.Router) {
 	// Get Coin Future Chart DATA
 	binanace_route.Post("future/chart", v1_contorllers.GetFuturesChart)
 	binanace_route.Post("future/leverage", v1_contorllers.SetFuturesLeverage)
+	binanace_route.Post("future/order", v1_contorllers.SetOrder)
 }
