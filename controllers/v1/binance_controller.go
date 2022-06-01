@@ -3,7 +3,6 @@ package v1_contorllers
 import (
 	"binanace_coin_trade_system/models"
 	binance_futures "binanace_coin_trade_system/pkg/lib/binance-futures"
-	"binanace_coin_trade_system/types"
 	"context"
 	"github.com/gofiber/fiber/v2"
 )
@@ -61,27 +60,113 @@ func SetFuturesLeverage(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"error":    false,
 		"msg":      "success set leverage",
-		"response": fiber.Map{"chart_data": response},
+		"response": fiber.Map{"leverage": response},
 	})
 
 }
 
-func SetOrder(c *fiber.Ctx) error {
+func SetShortOrder(c *fiber.Ctx) error {
 
-	futuresCleint := binance_futures.CreateBinanceFuturesClient()
-	futuresOrder := binance_futures.CreateShortOrderService(types.BTCUSDT, "0.006", futuresCleint)
+	setShortOrderModel := &models.SetShortOrderModel{}
 
-	response, err := futuresOrder.Do(context.Background())
+	if err := c.BodyParser(setShortOrderModel); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+	stopPriceTP := setShortOrderModel.StopPriceTP
+	stopPriceSL := setShortOrderModel.StopPriceSL
+
+	futuresClient := binance_futures.CreateBinanceFuturesClient()
+	futuresOrder := binance_futures.CreateShortOrderService(setShortOrderModel.Symbol, "0.005", futuresClient)
+	futuresOrderTP := binance_futures.CreateShortTP(setShortOrderModel.Symbol, &stopPriceTP, futuresClient)
+	futuresOrderSL := binance_futures.CreateShortSL(setShortOrderModel.Symbol, &stopPriceSL, futuresClient)
+
+	binance_futures.CancelAllOpenOrder(setShortOrderModel.Symbol, futuresClient)
+
+	resShort, err := futuresOrder.Do(context.Background())
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": true,
-			"msg":   err.Error()})
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short Error"})
+	}
+
+	resShortTP, err := futuresOrderTP.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short TP Error"})
+	}
+
+	resShortSL, err := futuresOrderSL.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short SL Error",
+		})
 	}
 
 	return c.JSON(fiber.Map{
 		"error":    false,
 		"msg":      "success set leverage",
-		"response": fiber.Map{"chart_data": response},
+		"response": fiber.Map{"resShort": resShort, "resShortTP": resShortTP, "resShortSL": resShortSL},
+	})
+
+}
+
+func SetLongOrder(c *fiber.Ctx) error {
+
+	setLongOrderModel := &models.SetLongOrderModel{}
+
+	if err := c.BodyParser(setLongOrderModel); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+	stopPriceTP := setLongOrderModel.StopPriceTP
+	stopPriceSL := setLongOrderModel.StopPriceSL
+
+	futuresClient := binance_futures.CreateBinanceFuturesClient()
+	futuresOrder := binance_futures.CreateLongOrderService(setLongOrderModel.Symbol, "0.005", futuresClient)
+	futuresOrderTP := binance_futures.CreateLongTP(setLongOrderModel.Symbol, &stopPriceTP, futuresClient)
+	futuresOrderSL := binance_futures.CreateLongSL(setLongOrderModel.Symbol, &stopPriceSL, futuresClient)
+
+	binance_futures.CancelAllOpenOrder(setLongOrderModel.Symbol, futuresClient)
+
+	resShort, err := futuresOrder.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short Error"})
+	}
+
+	resShortTP, err := futuresOrderTP.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short TP Error"})
+	}
+
+	resShortSL, err := futuresOrderSL.Do(context.Background())
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":       true,
+			"msg":         err.Error(),
+			"description": "Short SL Error",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"error":    false,
+		"msg":      "success set leverage",
+		"response": fiber.Map{"resShort": resShort, "resShortTP": resShortTP, "resShortSL": resShortSL},
 	})
 
 }

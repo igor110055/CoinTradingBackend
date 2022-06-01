@@ -11,3 +11,15 @@ type SetFuturesLeverageModel struct {
 	Symbol   types.BinanceSymbolType `json:"symbol" validate:"required,lte=255"`
 	Leverage int                     `json:"leverage" validate:"required,lte=255"`
 }
+
+type SetShortOrderModel struct {
+	Symbol      types.BinanceSymbolType `json:"symbol" validate:"required,lte=255"`
+	StopPriceTP string                  `json:"stop_price_tp" validate:"required,lte=255"`
+	StopPriceSL string                  `json:"stop_price_sl" validate:"required,lte=255"`
+}
+
+type SetLongOrderModel struct {
+	Symbol      types.BinanceSymbolType `json:"symbol" validate:"required,lte=255"`
+	StopPriceTP string                  `json:"stop_price_tp" validate:"required,lte=255"`
+	StopPriceSL string                  `json:"stop_price_sl" validate:"required,lte=255"`
+}
