@@ -1,23 +1,27 @@
-FROM golang:1.18-alpine AS builder
+FROM golang:1.18 AS build
 
-# Move to working directory (/build).
-WORKDIR /build
+# `boilerplate` should be replaced with your project name
+WORKDIR /
 
-# Copy and download dependency using go mod.
-COPY go.mod go.sum ./
-RUN go mod download
-
-# Copy the code into the container.
+# Copy all the Code and stuff to compile everything
 COPY . .
 
-# Set necessary environment variables needed for our image and build the API server.
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-RUN go build -ldflags="-s -w" -o apiserver .
+# Downloads all the dependencies in advance (could be left out, but it's more clear this way)
+RUN go mod download
 
-FROM scratch
+# Builds the application as a staticly linked one, to allow it to run on alpine
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o app .
 
-# Copy binary and config files from /build to root folder of scratch container.
-COPY --from=builder ["/build/apiserver", "/build/.env", "/"]
 
-# Command to run when starting the container.
-ENTRYPOINT ["/apiserver"]
+# Moving the binary to the 'final Image' to make it smaller
+FROM alpine:latest
+
+WORKDIR /app
+
+# `boilerplate` should be replaced here as well
+COPY --from=build / .
+
+# Exposes port 3000 because our program listens on that port
+EXPOSE 3000
+
+CMD ["./app"]

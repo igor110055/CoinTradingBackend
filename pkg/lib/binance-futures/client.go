@@ -18,7 +18,7 @@ func CreateBinanceFuturesClient() *futures.Client {
 	envData, err := godotenv.Read(".env")
 	futuresClient := futures.NewClient(envData["BINANCE_API_KEY"], envData["BINANCE_SECRET_KEY"])
 
-	_, err = futuresClient.NewSetServerTimeService().Do(context.Background())
+	futuresClient.NewSetServerTimeService().Do(context.Background())
 
 	return futuresClient
 }
