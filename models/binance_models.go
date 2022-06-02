@@ -1,6 +1,8 @@
 package models
 
-import "binanace_coin_trade_system/types"
+import (
+	"binanace_coin_trade_system/types"
+)
 
 type GetBinanceFuturesChartModel struct {
 	Symbol   types.BinanceSymbolType   `json:"symbol" validate:"required,lte=255"`

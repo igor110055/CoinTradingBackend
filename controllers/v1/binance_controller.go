@@ -2,7 +2,7 @@ package v1_contorllers
 
 import (
 	"binanace_coin_trade_system/models"
-	binance_futures "binanace_coin_trade_system/pkg/lib/binance-futures"
+	"binanace_coin_trade_system/pkg/lib/binance-futures"
 	"context"
 	"github.com/gofiber/fiber/v2"
 )

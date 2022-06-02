@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  gocoin: # 서비스명
+    image: gocoin:latest
+    ports:
+      - "3000:3000"
