@@ -2,6 +2,7 @@ package v1_contorllers
 
 import (
 	"binanace_coin_trade_system/models"
+	custom_bcrypt "binanace_coin_trade_system/pkg/lib/bcrypt"
 	"binanace_coin_trade_system/pkg/lib/binance-futures"
 	"context"
 	"github.com/gofiber/fiber/v2"
@@ -15,6 +16,14 @@ func GetFuturesChart(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": true,
 			"msg":   err.Error(),
+		})
+	}
+
+	verify := custom_bcrypt.CompareBcryptPassword(getBinanceFuturesChartModel.Password)
+	if verify == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   "login_failed",
 		})
 	}
 
@@ -47,6 +56,14 @@ func SetFuturesLeverage(c *fiber.Ctx) error {
 		})
 	}
 
+	verify := custom_bcrypt.CompareBcryptPassword(setFuturesLeverageModel.Password)
+	if verify == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   "login_failed",
+		})
+	}
+
 	futuresCleint := binance_futures.CreateBinanceFuturesClient()
 	futuresLeverage := binance_futures.UpdatePositonLeverageBySymbol(setFuturesLeverageModel.Symbol, setFuturesLeverageModel.Leverage, futuresCleint)
 
@@ -75,6 +92,15 @@ func SetShortOrder(c *fiber.Ctx) error {
 			"msg":   err.Error(),
 		})
 	}
+
+	verify := custom_bcrypt.CompareBcryptPassword(setShortOrderModel.Password)
+	if verify == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   "login_failed",
+		})
+	}
+
 	stopPriceTP := setShortOrderModel.StopPriceTP
 	stopPriceSL := setShortOrderModel.StopPriceSL
 
@@ -128,6 +154,15 @@ func SetLongOrder(c *fiber.Ctx) error {
 			"msg":   err.Error(),
 		})
 	}
+
+	verify := custom_bcrypt.CompareBcryptPassword(setLongOrderModel.Password)
+	if verify == false {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   "login_failed",
+		})
+	}
+
 	stopPriceTP := setLongOrderModel.StopPriceTP
 	stopPriceSL := setLongOrderModel.StopPriceSL
 

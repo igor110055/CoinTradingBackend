@@ -12,4 +12,5 @@ func RoutesIndex(app *fiber.App) {
 	v1 := api.Group("/v1")
 
 	v1_routes.V1BinanceRoute(v1)
+	v1_routes.V1ServerSettingRoute(v1)
 }
